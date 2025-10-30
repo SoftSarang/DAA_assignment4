@@ -1,0 +1,238 @@
+package com.aitu.utils;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+
+public class InputJsonGenerator {
+    private final Random random;
+    private final Gson gson;
+
+    public InputJsonGenerator() {
+        this.random = new Random();
+        this.gson = new GsonBuilder().setPrettyPrinting().create();
+    }
+
+    private JsonObject generateGraph(int id, int nodeCount, String variant, boolean isDense) {
+        Set<String> edgeSet = new HashSet<>();
+        JsonArray edges = new JsonArray();
+
+        int targetEdges;
+        if (isDense) {
+            targetEdges = Math.min(nodeCount * 4, nodeCount * (nodeCount - 1) / 3);
+        } else {
+            targetEdges = (int)(nodeCount * 1.8);
+        }
+
+        switch (variant) {
+            case "pure_dag":
+                generatePureDAG(nodeCount, targetEdges, edges, edgeSet);
+                break;
+            case "one_cycle":
+                generateOneCycle(nodeCount, targetEdges, edges, edgeSet);
+                break;
+            case "two_cycles":
+                generateTwoCycles(nodeCount, targetEdges, edges, edgeSet);
+                break;
+            case "mixed":
+                generateSeveralSCCs(nodeCount, targetEdges, edges, edgeSet, 3, 7);
+                break;
+            case "many_sccs":
+                generateSeveralSCCs(nodeCount, targetEdges, edges, edgeSet, 5, 10);
+                break;
+        }
+
+        JsonObject graph = new JsonObject();
+        graph.addProperty("id", id);
+        graph.addProperty("directed", true);
+        graph.addProperty("n", nodeCount);
+        graph.add("edges", edges);
+        graph.addProperty("source", 4);
+        graph.addProperty("weight_model", "edge");
+        graph.addProperty("density", isDense ? "dense" : "sparse");
+        graph.addProperty("variant", variant);
+        return graph;
+    }
+
+    private void generatePureDAG(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
+        int[] level = new int[n];
+        int numLevels = Math.max(3, (int)Math.sqrt(n));
+        for (int i = 0; i < n; i++) {
+            level[i] = (i * numLevels) / n;
+        }
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                if (level[j] > level[i]) {
+                    addEdge(i, j, edges, edgeSet);
+                    break;
+                }
+            }
+        }
+        int attempts = 0;
+        int maxAttempts = 10000;
+        while (edges.size() < targetEdges && attempts < maxAttempts) {
+            int u = random.nextInt(n);
+            int v = random.nextInt(n);
+            if (u < v && level[u] < level[v]) {
+                addEdge(u, v, edges, edgeSet);
+            }
+            attempts++;
+        }
+    }
+
+    private void generateOneCycle(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
+        for (int i = 0; i < n - 1; i++) {
+            addEdge(i, i + 1, edges, edgeSet);
+        }
+        addEdge(n - 1, 0, edges, edgeSet);
+        int attempts = 0;
+        int maxAttempts = 10000;
+        while (edges.size() < targetEdges && attempts < maxAttempts) {
+            int u = random.nextInt(n);
+            int v = random.nextInt(n);
+            if (u != v) {
+                addEdge(u, v, edges, edgeSet);
+            }
+            attempts++;
+        }
+    }
+
+    private int generateTwoCycles(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
+        int split = n / 2;
+
+        for (int i = 0; i < split - 1; i++) {
+            addEdge(i, i + 1, edges, edgeSet);
+        }
+        addEdge(split - 1, 0, edges, edgeSet);
+
+        for (int i = split; i < n - 1; i++) {
+            addEdge(i, i + 1, edges, edgeSet);
+        }
+        addEdge(n - 1, split, edges, edgeSet);
+
+        addEdge(random.nextInt(split), split + random.nextInt(n - split), edges, edgeSet);
+
+        int attempts = 0;
+        int maxAttempts = 10000;
+        while (edges.size() < targetEdges && attempts < maxAttempts) {
+            int u = random.nextInt(n);
+            int v = random.nextInt(n);
+            boolean sameGroup = (u < split && v < split) || (u >= split && v >= split);
+            if (u != v && sameGroup) {
+                addEdge(u, v, edges, edgeSet);
+            }
+            attempts++;
+        }
+        return 2;
+    }
+
+    private int generateSeveralSCCs(int n, int targetEdges, JsonArray edges,
+                                    Set<String> edgeSet, int minSCCs, int maxSCCs) {
+        int numSCCs = minSCCs + random.nextInt(maxSCCs - minSCCs + 1);
+        numSCCs = Math.min(numSCCs, n / 2);
+        List<List<Integer>> sccs = new ArrayList<>();
+        int verticesPerSCC = n / numSCCs;
+        int remainder = n % numSCCs;
+        int current = 0;
+        for (int i = 0; i < numSCCs; i++) {
+            int size = verticesPerSCC + (i < remainder ? 1 : 0);
+            List<Integer> scc = new ArrayList<>();
+            for (int j = 0; j < size; j++) {
+                scc.add(current++);
+            }
+            sccs.add(scc);
+        }
+        for (List<Integer> scc : sccs) {
+            if (scc.size() == 1) continue;
+            for (int i = 0; i < scc.size() - 1; i++) {
+                addEdge(scc.get(i), scc.get(i + 1), edges, edgeSet);
+            }
+            addEdge(scc.get(scc.size() - 1), scc.get(0), edges, edgeSet);
+        }
+        for (int i = 0; i < numSCCs - 1; i++) {
+            List<Integer> from = sccs.get(i);
+            List<Integer> to = sccs.get(i + 1);
+            int u = from.get(random.nextInt(from.size()));
+            int v = to.get(random.nextInt(to.size()));
+            addEdge(u, v, edges, edgeSet);
+        }
+        int attempts = 0;
+        int maxAttempts = 10000;
+        while (edges.size() < targetEdges && attempts < maxAttempts) {
+            int u = random.nextInt(n);
+            int v = random.nextInt(n);
+            if (u != v) {
+                addEdge(u, v, edges, edgeSet);
+            }
+            attempts++;
+        }
+        return numSCCs;
+    }
+
+    private void addEdge(int u, int v, JsonArray edges, Set<String> edgeSet) {
+        String key = u + "->" + v;
+        if (!edgeSet.contains(key)) {
+            JsonObject edge = new JsonObject();
+            edge.addProperty("u", u);
+            edge.addProperty("v", v);
+            edge.addProperty("w", Math.round((1 + random.nextDouble() * 9) * 10) / 10.0);
+            edges.add(edge);
+            edgeSet.add(key);
+        }
+    }
+
+    private void generateAndSave(String filename, boolean isDense) throws IOException {
+        JsonObject root = new JsonObject();
+        JsonArray graphs = new JsonArray();
+        int id = 1;
+
+        if (!isDense) {
+            graphs.add(generateGraph(id++, 6, "pure_dag", false));
+            graphs.add(generateGraph(id++, 8, "one_cycle", false));
+            graphs.add(generateGraph(id++, 10, "two_cycles", false));
+            graphs.add(generateGraph(id++, 12, "mixed", false));
+            graphs.add(generateGraph(id++, 16, "mixed", false));
+            graphs.add(generateGraph(id++, 20, "mixed", false));
+            graphs.add(generateGraph(id++, 25, "many_sccs", false));
+            graphs.add(generateGraph(id++, 35, "pure_dag", false));
+            graphs.add(generateGraph(id++, 50, "many_sccs", false));
+        } else {
+            graphs.add(generateGraph(id++, 6, "pure_dag", true));
+            graphs.add(generateGraph(id++, 8, "one_cycle", true));
+            graphs.add(generateGraph(id++, 10, "two_cycles", true));
+            graphs.add(generateGraph(id++, 12, "mixed", true));
+            graphs.add(generateGraph(id++, 16, "mixed", true));
+            graphs.add(generateGraph(id++, 20, "mixed", true));
+            graphs.add(generateGraph(id++, 25, "many_sccs", true));
+            graphs.add(generateGraph(id++, 35, "pure_dag", true));
+            graphs.add(generateGraph(id++, 50, "many_sccs", true));
+        }
+
+        root.add("graphs", graphs);
+        File dir = new File("data");
+        if (!dir.exists()) dir.mkdirs();
+        try (FileWriter file = new FileWriter("data/" + filename)) {
+            gson.toJson(root, file);
+        }
+    }
+
+    public void generateAll() throws IOException {
+        generateAndSave("input_sparse.json", false);
+        generateAndSave("input_dense.json", true);
+    }
+
+    public static void main(String[] args) {
+        InputJsonGenerator generator = new InputJsonGenerator();
+        try {
+            generator.generateAll();
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
