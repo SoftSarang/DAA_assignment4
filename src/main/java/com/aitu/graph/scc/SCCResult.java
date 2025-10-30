@@ -1,4 +1,4 @@
-package com.aitu.scc;
+package com.aitu.graph.scc;
 
 import java.util.List;
 

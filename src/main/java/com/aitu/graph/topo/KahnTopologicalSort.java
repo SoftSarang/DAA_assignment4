@@ -1,4 +1,4 @@
-package com.aitu.ts;
+package com.aitu.graph.topo;
 
 import com.aitu.core.DirectedGraph;
 import com.aitu.core.Edge;

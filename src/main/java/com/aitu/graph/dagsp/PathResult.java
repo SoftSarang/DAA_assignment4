@@ -1,4 +1,4 @@
-package com.aitu.dag;
+package com.aitu.graph.dagsp;
 
 
 import java.util.List;

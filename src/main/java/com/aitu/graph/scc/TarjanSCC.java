@@ -1,4 +1,4 @@
-package com.aitu.scc;
+package com.aitu.graph.scc;
 
 import com.aitu.core.DirectedGraph;
 import com.aitu.core.Edge;
