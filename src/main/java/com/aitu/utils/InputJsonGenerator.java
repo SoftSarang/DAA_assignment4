@@ -24,7 +24,7 @@ public class InputJsonGenerator {
 
         int targetEdges;
         if (isDense) {
-            targetEdges = Math.min(nodeCount * 4, nodeCount * (nodeCount - 1) / 3);
+            targetEdges = Math.max(nodeCount * 4, nodeCount * (nodeCount - 1) / 2);
         } else {
             targetEdges = (int)(nodeCount * 1.8);
         }
@@ -40,23 +40,42 @@ public class InputJsonGenerator {
                 generateTwoCycles(nodeCount, targetEdges, edges, edgeSet);
                 break;
             case "mixed":
-                generateSeveralSCCs(nodeCount, targetEdges, edges, edgeSet, 3, 7);
+                generateSeveralSCCs(nodeCount, targetEdges, edges, edgeSet, 3, 5);
                 break;
             case "many_sccs":
                 generateSeveralSCCs(nodeCount, targetEdges, edges, edgeSet, 5, 10);
                 break;
         }
 
+        int source = getSmartSource(nodeCount, variant);
+
         JsonObject graph = new JsonObject();
         graph.addProperty("id", id);
         graph.addProperty("directed", true);
         graph.addProperty("n", nodeCount);
         graph.add("edges", edges);
-        graph.addProperty("source", 4);
+        graph.addProperty("source", source);
         graph.addProperty("weight_model", "edge");
         graph.addProperty("density", isDense ? "dense" : "sparse");
         graph.addProperty("variant", variant);
         return graph;
+    }
+
+    private int getSmartSource(int nodeCount, String variant) {
+        switch (variant) {
+            case "pure_dag":
+                return 0;
+            case "one_cycle":
+                return 0;
+            case "two_cycles":
+                return 0;
+            case "mixed":
+                return 0;
+            case "many_sccs":
+                return Math.max(0, nodeCount / 3);
+            default:
+                return 0;
+        }
     }
 
     private void generatePureDAG(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
@@ -65,6 +84,7 @@ public class InputJsonGenerator {
         for (int i = 0; i < n; i++) {
             level[i] = (i * numLevels) / n;
         }
+
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (level[j] > level[i]) {
@@ -73,6 +93,7 @@ public class InputJsonGenerator {
                 }
             }
         }
+
         int attempts = 0;
         int maxAttempts = 10000;
         while (edges.size() < targetEdges && attempts < maxAttempts) {
@@ -90,6 +111,7 @@ public class InputJsonGenerator {
             addEdge(i, i + 1, edges, edgeSet);
         }
         addEdge(n - 1, 0, edges, edgeSet);
+
         int attempts = 0;
         int maxAttempts = 10000;
         while (edges.size() < targetEdges && attempts < maxAttempts) {
@@ -102,7 +124,7 @@ public class InputJsonGenerator {
         }
     }
 
-    private int generateTwoCycles(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
+    private void generateTwoCycles(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
         int split = n / 2;
 
         for (int i = 0; i < split - 1; i++) {
@@ -128,17 +150,18 @@ public class InputJsonGenerator {
             }
             attempts++;
         }
-        return 2;
     }
 
     private int generateSeveralSCCs(int n, int targetEdges, JsonArray edges,
                                     Set<String> edgeSet, int minSCCs, int maxSCCs) {
         int numSCCs = minSCCs + random.nextInt(maxSCCs - minSCCs + 1);
         numSCCs = Math.min(numSCCs, n / 2);
+
         List<List<Integer>> sccs = new ArrayList<>();
         int verticesPerSCC = n / numSCCs;
         int remainder = n % numSCCs;
         int current = 0;
+
         for (int i = 0; i < numSCCs; i++) {
             int size = verticesPerSCC + (i < remainder ? 1 : 0);
             List<Integer> scc = new ArrayList<>();
@@ -147,6 +170,7 @@ public class InputJsonGenerator {
             }
             sccs.add(scc);
         }
+
         for (List<Integer> scc : sccs) {
             if (scc.size() == 1) continue;
             for (int i = 0; i < scc.size() - 1; i++) {
@@ -154,6 +178,7 @@ public class InputJsonGenerator {
             }
             addEdge(scc.get(scc.size() - 1), scc.get(0), edges, edgeSet);
         }
+
         for (int i = 0; i < numSCCs - 1; i++) {
             List<Integer> from = sccs.get(i);
             List<Integer> to = sccs.get(i + 1);
@@ -161,16 +186,35 @@ public class InputJsonGenerator {
             int v = to.get(random.nextInt(to.size()));
             addEdge(u, v, edges, edgeSet);
         }
+
+        for (int i = 0; i < numSCCs - 1; i++) {
+            List<Integer> from = sccs.get(i);
+            for (int j = i + 2; j < numSCCs && edges.size() < targetEdges * 0.8; j++) {
+                List<Integer> to = sccs.get(j);
+                if (random.nextDouble() < 0.5) {
+                    int u = from.get(random.nextInt(from.size()));
+                    int v = to.get(random.nextInt(to.size()));
+                    addEdge(u, v, edges, edgeSet);
+                }
+            }
+        }
+
         int attempts = 0;
         int maxAttempts = 10000;
+
         while (edges.size() < targetEdges && attempts < maxAttempts) {
-            int u = random.nextInt(n);
-            int v = random.nextInt(n);
-            if (u != v) {
-                addEdge(u, v, edges, edgeSet);
+            int sccIdx = random.nextInt(numSCCs);
+            List<Integer> scc = sccs.get(sccIdx);
+            if (scc.size() > 1) {
+                int u = scc.get(random.nextInt(scc.size()));
+                int v = scc.get(random.nextInt(scc.size()));
+                if (u != v) {
+                    addEdge(u, v, edges, edgeSet);
+                }
             }
             attempts++;
         }
+
         return numSCCs;
     }
 
