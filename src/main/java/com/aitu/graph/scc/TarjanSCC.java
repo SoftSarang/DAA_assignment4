@@ -80,7 +80,6 @@ public class TarjanSCC {
                 metrics.incrementStackOperation();
             } while (v != u);
 
-            Collections.sort(component);
             components.add(component);
         }
     }

@@ -24,9 +24,6 @@ public class DAGLongestPath {
         Arrays.fill(parent, -1);
         dist[source] = 0;
 
-        metrics.reset();
-        metrics.startTimer();
-
         KahnTopologicalSort TS = new KahnTopologicalSort();
         TopologicalSortResult TSResult = TS.sort(graph);
 
@@ -64,6 +61,9 @@ public class DAGLongestPath {
         int endVertex = -1;
         PathResult bestResult = null;
 
+        metrics.reset();
+        metrics.startTimer();
+
         for (int source = 0; source < n; source++) {
             PathResult result = computeLongestPaths(graph, source);
             if (result != null) {
@@ -77,6 +77,8 @@ public class DAGLongestPath {
                 }
             }
         }
+
+        metrics.stopTimer();
 
         return new CriticalPathResult(bestResult, endVertex, maxLength);
     }

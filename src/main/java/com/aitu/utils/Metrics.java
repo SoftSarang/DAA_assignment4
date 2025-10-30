@@ -145,7 +145,7 @@ public class Metrics {
     public static void writeCsv(String filePath, String[][] data, boolean append) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, append))) {
             if (!append) {
-                writer.write("graph_id;vertices;edges;algorithm;num_sccs;operations_count;execution_time_ms\n");
+                writer.write("graph_id;vertices;edges;density;variant;algorithm;total_operations_count;total_execution_time_ms;path_length\n");
             }
             for (String[] row : data) {
                 writer.write(String.join(";", row) + "\n");
