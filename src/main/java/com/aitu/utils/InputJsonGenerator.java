@@ -9,6 +9,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Generates test graphs with various structures for performance evaluation.
+ * Creates both sparse and dense variants for comparison.
+ */
 public class InputJsonGenerator {
     private final Random random;
     private final Gson gson;
@@ -18,17 +22,23 @@ public class InputJsonGenerator {
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
+    /**
+     * Generates a single graph with specified structure and density.
+     * Sparse: nodeCount * 1.8 edges
+     * Dense: nodeCount * 4 edges (or close to complete graph)
+     */
     private JsonObject generateGraph(int id, int nodeCount, String variant, boolean isDense) {
         Set<String> edgeSet = new HashSet<>();
         JsonArray edges = new JsonArray();
 
         int targetEdges;
         if (isDense) {
-            targetEdges = Math.max(nodeCount * 4, nodeCount * (nodeCount - 1) / 2);
+            targetEdges = Math.min(nodeCount * 4, nodeCount * (nodeCount - 1) / 3);
         } else {
             targetEdges = (int)(nodeCount * 1.8);
         }
 
+        // Generate based on variant
         switch (variant) {
             case "pure_dag":
                 generatePureDAG(nodeCount, targetEdges, edges, edgeSet);
@@ -78,13 +88,19 @@ public class InputJsonGenerator {
         }
     }
 
+    /**
+     * Generates DAG by assigning levels and ensuring u < v implies level[u] < level[v]
+     */
     private void generatePureDAG(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
         int[] level = new int[n];
         int numLevels = Math.max(3, (int)Math.sqrt(n));
+
+        // Assign levels: vertices with lower indices get lower levels
         for (int i = 0; i < n; i++) {
             level[i] = (i * numLevels) / n;
         }
 
+        // Add edges respecting levels (ensures acyclic)
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (level[j] > level[i]) {
@@ -94,6 +110,7 @@ public class InputJsonGenerator {
             }
         }
 
+        // Fill remaining edges randomly while respecting DAG property
         int attempts = 0;
         int maxAttempts = 10000;
         while (edges.size() < targetEdges && attempts < maxAttempts) {
@@ -106,12 +123,17 @@ public class InputJsonGenerator {
         }
     }
 
+    /**
+     * Generates single cycle: 0->1->2->...->n-1->0
+     */
     private void generateOneCycle(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
+        // Create cycle
         for (int i = 0; i < n - 1; i++) {
             addEdge(i, i + 1, edges, edgeSet);
         }
         addEdge(n - 1, 0, edges, edgeSet);
 
+        // Add random edges to reach target
         int attempts = 0;
         int maxAttempts = 10000;
         while (edges.size() < targetEdges && attempts < maxAttempts) {
@@ -124,21 +146,28 @@ public class InputJsonGenerator {
         }
     }
 
+    /**
+     * Generates two separate cycles and connects them
+     */
     private void generateTwoCycles(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
         int split = n / 2;
 
+        // First cycle: 0->1->...->split-1->0
         for (int i = 0; i < split - 1; i++) {
             addEdge(i, i + 1, edges, edgeSet);
         }
         addEdge(split - 1, 0, edges, edgeSet);
 
+        // Second cycle: split->...->n-1->split
         for (int i = split; i < n - 1; i++) {
             addEdge(i, i + 1, edges, edgeSet);
         }
         addEdge(n - 1, split, edges, edgeSet);
 
+        // Connect cycles
         addEdge(random.nextInt(split), split + random.nextInt(n - split), edges, edgeSet);
 
+        // Fill remaining edges
         int attempts = 0;
         int maxAttempts = 10000;
         while (edges.size() < targetEdges && attempts < maxAttempts) {
@@ -152,6 +181,9 @@ public class InputJsonGenerator {
         }
     }
 
+    /**
+     * Generates multiple SCCs connected in a DAG structure
+     */
     private int generateSeveralSCCs(int n, int targetEdges, JsonArray edges,
                                     Set<String> edgeSet, int minSCCs, int maxSCCs) {
         int numSCCs = minSCCs + random.nextInt(maxSCCs - minSCCs + 1);
@@ -218,6 +250,9 @@ public class InputJsonGenerator {
         return numSCCs;
     }
 
+    /**
+     * Adds edge with random weight (1.0 to 10.0) if not duplicate
+     */
     private void addEdge(int u, int v, JsonArray edges, Set<String> edgeSet) {
         String key = u + "->" + v;
         if (!edgeSet.contains(key)) {
@@ -230,6 +265,9 @@ public class InputJsonGenerator {
         }
     }
 
+    /**
+     * Generates and saves both sparse and dense variants
+     */
     private void generateAndSave(String filename, boolean isDense) throws IOException {
         JsonObject root = new JsonObject();
         JsonArray graphs = new JsonArray();
@@ -265,11 +303,15 @@ public class InputJsonGenerator {
         }
     }
 
+
     public void generateAll() throws IOException {
         generateAndSave("input_sparse.json", false);
         generateAndSave("input_dense.json", true);
     }
 
+    /**
+     * Main entry point: generates both input_sparse.json and input_dense.json
+     */
     public static void main(String[] args) {
         InputJsonGenerator generator = new InputJsonGenerator();
         try {
