@@ -11,50 +11,74 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Parses JSON input files containing graph definitions.
+ */
 public class InputReader {
+
+    /**
+     * Loads all graphs from a JSON file with validation.
+     */
     public static List<GraphData> loadAllGraphs(String filepath) throws IOException {
         Gson gson = new Gson();
-        JsonObject root = gson.fromJson(new FileReader(filepath), JsonObject.class);
-        JsonArray graphsArray = root.getAsJsonArray("graphs");
+        try (FileReader reader = new FileReader(filepath)) {
+            JsonObject root = gson.fromJson(reader, JsonObject.class);
+            if (root == null) throw new IOException("Invalid JSON format");
 
-        List<GraphData> graphsList = new ArrayList<>();
+            JsonArray graphsArray = root.getAsJsonArray("graphs");
+            if (graphsArray == null) throw new IOException("No 'graphs' array in JSON");
 
-        for (JsonElement element : graphsArray) {
-            JsonObject graphJson = element.getAsJsonObject();
+            List<GraphData> graphsList = new ArrayList<>();
 
-            int id = graphJson.get("id").getAsInt();
-            int n = graphJson.get("n").getAsInt();
-            int source = graphJson.has("source") ? graphJson.get("source").getAsInt() : 0;
-            String density = graphJson.has("density") ? graphJson.get("density").getAsString() : "unknown";
-            String variant = graphJson.has("variant") ? graphJson.get("variant").getAsString() : "unknown";
+            // Parse each graph
+            for (JsonElement element : graphsArray) {
+                JsonObject graphJson = element.getAsJsonObject();
 
-            DirectedGraph graph = new DirectedGraph(n);
-            JsonArray edges = graphJson.getAsJsonArray("edges");
+                int id = graphJson.get("id").getAsInt();
+                int n = graphJson.get("n").getAsInt();
 
-            for (int i = 0; i < edges.size(); i++) {
-                JsonObject edge = edges.get(i).getAsJsonObject();
-                int u = edge.get("u").getAsInt();
-                int v = edge.get("v").getAsInt();
-                double w = edge.get("w").getAsDouble();
-                graph.addEdge(u, v, w);
+                if (n <= 0) throw new IllegalArgumentException("Vertices must be > 0");
+
+                int source = graphJson.has("source") ? graphJson.get("source").getAsInt() : 0;
+                if (source < 0 || source >= n) {
+                    throw new IllegalArgumentException("Source out of bounds");
+                }
+
+                String density = graphJson.has("density") ? graphJson.get("density").getAsString() : "unknown";
+                String variant = graphJson.has("variant") ? graphJson.get("variant").getAsString() : "unknown";
+
+                DirectedGraph graph = new DirectedGraph(n);
+
+                // Parse edges
+                JsonArray edges = graphJson.getAsJsonArray("edges");
+                if (edges != null) {
+                    for (JsonElement edgeElem : edges) {
+                        JsonObject edge = edgeElem.getAsJsonObject();
+                        int u = edge.get("u").getAsInt();
+                        int v = edge.get("v").getAsInt();
+                        double w = edge.get("w").getAsDouble();
+
+                        if (u < 0 || u >= n || v < 0 || v >= n) {
+                            throw new IllegalArgumentException("Edge vertex out of bounds");
+                        }
+
+                        graph.addEdge(u, v, w);
+                    }
+                }
+
+                graphsList.add(new GraphData(id, graph, source, density, variant));
             }
 
-            graphsList.add(new GraphData(id, graph, source, density, variant));
+            return graphsList;
+        } catch (IOException e) {
+            System.err.println("Error reading JSON: " + e.getMessage());
+            throw e;
         }
-
-        return graphsList;
     }
 
-    public static GraphData loadGraphById(String filepath, int targetId) throws IOException {
-        List<GraphData> allGraphs = loadAllGraphs(filepath);
-        for (GraphData gd : allGraphs) {
-            if (gd.getId() == targetId) {
-                return gd;
-            }
-        }
-        throw new IOException("Graph with ID " + targetId + " not found in " + filepath);
-    }
-
+    /**
+     * Inner class holding parsed graph metadata and structure.
+     */
     public static class GraphData {
         private final int id;
         private final DirectedGraph graph;
@@ -88,46 +112,6 @@ public class InputReader {
 
         public String getVariant() {
             return variant;
-        }
-
-        public String getExpectedSCCs() {
-            switch (variant) {
-                case "pure_dag":
-                    return String.valueOf(graph.getN()); // Each vertex is an SCC
-                case "one_cycle":
-                    return "1";
-                case "two_cycles":
-                    return "2";
-                case "mixed":
-                    return "3-7";
-                case "many_sccs":
-                    return "5-10";
-                default:
-                    return "unknown";
-            }
-        }
-
-        public String getDescription() {
-            switch (variant) {
-                case "pure_dag":
-                    return "Pure DAG (no cycles)";
-                case "one_cycle":
-                    return "One large cycle";
-                case "two_cycles":
-                    return "Two separate cycles";
-                case "mixed":
-                    return "Mixed structure (several SCCs)";
-                case "many_sccs":
-                    return "Many SCCs";
-                default:
-                    return "Unknown structure";
-            }
-        }
-
-        @Override
-        public String toString() {
-            return String.format("Graph #%d (%s, %s): %d vertices, %d edges, source=%d",
-                    id, density, variant, graph.getN(), graph.getAllEdges().size(), source);
         }
     }
 }

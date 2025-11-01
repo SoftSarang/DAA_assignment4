@@ -102,7 +102,7 @@ public class Main {
 
     private static void warmupJIT() {
         try {
-            List<GraphData> warmupGraphs = InputReader.loadAllGraphs("data/input_sparse.json");
+            List<GraphData> warmupGraphs = InputReader.loadAllGraphs("data/input_dense.json");
 
             for (int iteration = 0; iteration < 3; iteration++) {
 
@@ -168,8 +168,8 @@ public class Main {
                     variant,
                     "DAG-ShortestPath",
                     String.valueOf(spTotalOps),
-                    String.format("%.3f", spTotalTime),
-                    String.format("%.2f", spLength)
+                    String.format("%.2f", spLength),
+                    String.format("%.3f", spTotalTime)
             });
         }
 
@@ -181,8 +181,9 @@ public class Main {
                 variant,
                 "DAG-LongestPath",
                 String.valueOf(lpTotalOps),
-                String.format("%.3f", lpTotalTime),
-                String.format("%.2f", r.cpResult.getLength())
+                String.format("%.2f", r.cpResult.getLength()),
+                String.format("%.3f", lpTotalTime)
+
         });
     }
 

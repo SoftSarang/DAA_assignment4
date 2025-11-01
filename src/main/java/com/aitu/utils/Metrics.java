@@ -4,6 +4,10 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * Tracks performance metrics for all algorithms.
+ * Measures execution time and operation counts (comparisons, updates, etc.)
+ */
 public class Metrics {
     private long startTime;
     private double executionTimeMs = 0.0;
@@ -38,6 +42,7 @@ public class Metrics {
         executionTimeMs = (endTime - startTime) / 1_000_000.0;
     }
 
+    // Increment methods for each operation type
     public void incrementDFSVisit() {
         dfsVisits++;
     }
@@ -74,50 +79,15 @@ public class Metrics {
         comparisons++;
     }
 
-    public long getDFSVisits() {
-        return dfsVisits;
-    }
-
-    public long getEdgeExplorations() {
-        return edgeExplorations;
-    }
-
-    public long getStackOperations() {
-        return stackOperations;
-    }
-
-    public long getLowLinkUpdates() {
-        return lowLinkUpdates;
-    }
-
-    public long getQueueOperations() {
-        return queueOperations;
-    }
-
-    public long getInDegreeUpdates() {
-        return inDegreeUpdates;
-    }
-
-    public long getRelaxations() {
-        return relaxations;
-    }
-
-    public long getDistanceUpdates() {
-        return distanceUpdates;
-    }
-
-    public long getComparisons() {
-        return comparisons;
-    }
-
+    // Getter method
     public double getExecutionTimeMs() {
         return executionTimeMs;
     }
 
-    public String getAlgorithmName() {
-        return algorithmName;
-    }
 
+    /**
+     * Calculates total operations based on algorithm type.
+     */
     public long getTotalOperations() {
         if (algorithmName.contains("SCC") || algorithmName.contains("Tarjan")) {
             return dfsVisits + edgeExplorations + stackOperations + lowLinkUpdates;
@@ -129,6 +99,9 @@ public class Metrics {
         return 0;
     }
 
+    /**
+     * Resets all metrics to zero.
+     */
     public void reset() {
         dfsVisits = 0;
         edgeExplorations = 0;
@@ -142,14 +115,20 @@ public class Metrics {
         executionTimeMs = 0.0;
     }
 
+    /**
+     * Writes data to CSV file with semicolon delimiter.
+     */
     public static void writeCsv(String filePath, String[][] data, boolean append) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, append))) {
             if (!append) {
-                writer.write("graph_id;vertices;edges;density;variant;algorithm;total_operations_count;total_execution_time_ms;path_length\n");
+                writer.write("graph_id;vertices;edges;density;variant;algorithm;total_operations_count;path_length;total_execution_time_ms\n");
             }
             for (String[] row : data) {
                 writer.write(String.join(";", row) + "\n");
             }
+        } catch (IOException e) {
+            System.err.println("Error writing CSV: " + e.getMessage());
+            throw e;
         }
     }
 }
