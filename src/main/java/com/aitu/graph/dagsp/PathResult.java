@@ -2,7 +2,7 @@ package com.aitu.graph.dagsp;
 
 
 import java.util.List;
-
+import com.aitu.core.*;
 /**
  * Stores shortest/longest path computation results for a single source.
  * Contains distances, parent pointers, and methods to reconstruct paths.

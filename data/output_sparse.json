@@ -31,73 +31,85 @@
             1
           ]
         ],
+        "sizes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
         "operations_count": 32,
-        "execution_time_ms": 0.0149
+        "execution_time_ms": 0.2812
       },
       "condensation_graph": {
         "vertices": 6,
         "edges": 10
       },
       "topological_sort": {
-        "topological_order": [
+        "component_order": [
           3,
           5,
           2,
           4,
+          1,
+          0
+        ],
+        "vertex_order": [
           0,
-          1
+          1,
+          2,
+          3,
+          5,
+          4
         ],
         "operations_count": 22,
-        "execution_time_ms": 0.0082
+        "execution_time_ms": 0.0296
       },
       "shortest_path": {
         "source": 0,
+        "source_scc": 3,
+        "target_scc": 0,
         "path": [
           3,
-          2,
           0
         ],
         "edges": [
           {
             "u": 3,
-            "v": 2,
-            "w": 4.8
-          },
-          {
-            "u": 2,
             "v": 0,
-            "w": 5.7
+            "w": 8.4
           }
         ],
-        "path_length": 10.5,
-        "operations_count": 11,
-        "execution_time_ms": 0.0195,
-        "total_operations_count": 65,
-        "total_execution_time_ms": 0.0426
+        "path_length": 8.4,
+        "operations_count": 13,
+        "execution_time_ms": 0.0438,
+        "total_operations_count": 67,
+        "total_execution_time_ms": 0.3546
       },
       "longest_path": {
-        "critical_path_length": 15.8,
+        "critical_path_length": 15.9,
         "critical_path": [
-          5,
-          4,
-          0
+          3,
+          2,
+          1
         ],
         "edges": [
           {
-            "u": 5,
-            "v": 4,
-            "w": 7.3
+            "u": 3,
+            "v": 2,
+            "w": 7.5
           },
           {
-            "u": 4,
-            "v": 0,
-            "w": 8.5
+            "u": 2,
+            "v": 1,
+            "w": 8.4
           }
         ],
-        "operations_count": 48,
-        "execution_time_ms": 0.122,
-        "total_operations_count": 102,
-        "total_execution_time_ms": 0.1451
+        "operations_count": 45,
+        "execution_time_ms": 0.0837,
+        "total_operations_count": 99,
+        "total_execution_time_ms": 0.3945
       }
     },
     {
@@ -123,31 +135,46 @@
             0
           ]
         ],
+        "sizes": [
+          8
+        ],
         "operations_count": 52,
-        "execution_time_ms": 0.0217
+        "execution_time_ms": 0.0148
       },
       "condensation_graph": {
         "vertices": 1,
         "edges": 0
       },
       "topological_sort": {
-        "topological_order": [
+        "component_order": [
+          0
+        ],
+        "vertex_order": [
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1,
           0
         ],
         "operations_count": 2,
-        "execution_time_ms": 0.0064
+        "execution_time_ms": 0.0031
       },
       "shortest_path": {
         "source": 0,
+        "source_scc": 0,
+        "target_scc": 0,
         "path": [
           0
         ],
         "edges": [],
         "path_length": 0.0,
         "operations_count": 0,
-        "execution_time_ms": 0.0151,
+        "execution_time_ms": 0.016,
         "total_operations_count": 54,
-        "total_execution_time_ms": 0.0432
+        "total_execution_time_ms": 0.0339
       },
       "longest_path": {
         "critical_path_length": 0.0,
@@ -156,9 +183,9 @@
         ],
         "edges": [],
         "operations_count": 0,
-        "execution_time_ms": 0.0138,
+        "execution_time_ms": 0.0182,
         "total_operations_count": 54,
-        "total_execution_time_ms": 0.0419
+        "total_execution_time_ms": 0.0361
       }
     },
     {
@@ -174,11 +201,11 @@
         "num_sccs": 2,
         "sccs": [
           [
+            7,
+            6,
             5,
             9,
-            8,
-            7,
-            6
+            8
           ],
           [
             4,
@@ -188,23 +215,41 @@
             0
           ]
         ],
+        "sizes": [
+          5,
+          5
+        ],
         "operations_count": 66,
-        "execution_time_ms": 0.0798
+        "execution_time_ms": 0.0212
       },
       "condensation_graph": {
         "vertices": 2,
         "edges": 1
       },
       "topological_sort": {
-        "topological_order": [
+        "component_order": [
           1,
           0
         ],
+        "vertex_order": [
+          4,
+          3,
+          2,
+          1,
+          0,
+          7,
+          6,
+          5,
+          9,
+          8
+        ],
         "operations_count": 5,
-        "execution_time_ms": 0.007
+        "execution_time_ms": 0.0066
       },
       "shortest_path": {
         "source": 0,
+        "source_scc": 1,
+        "target_scc": 0,
         "path": [
           1,
           0
@@ -213,17 +258,17 @@
           {
             "u": 1,
             "v": 0,
-            "w": 5.3
+            "w": 8.5
           }
         ],
-        "path_length": 5.3,
+        "path_length": 8.5,
         "operations_count": 3,
-        "execution_time_ms": 0.023,
+        "execution_time_ms": 0.0203,
         "total_operations_count": 74,
-        "total_execution_time_ms": 0.10980000000000001
+        "total_execution_time_ms": 0.0481
       },
       "longest_path": {
-        "critical_path_length": 5.3,
+        "critical_path_length": 8.5,
         "critical_path": [
           1,
           0
@@ -232,13 +277,13 @@
           {
             "u": 1,
             "v": 0,
-            "w": 5.3
+            "w": 8.5
           }
         ],
         "operations_count": 3,
-        "execution_time_ms": 0.0182,
+        "execution_time_ms": 0.0222,
         "total_operations_count": 74,
-        "total_execution_time_ms": 0.10500000000000001
+        "total_execution_time_ms": 0.05
       }
     },
     {
@@ -251,91 +296,128 @@
         "source": 0
       },
       "tarjan_scc": {
-        "num_sccs": 3,
+        "num_sccs": 7,
         "sccs": [
           [
-            9,
-            8,
+            4
+          ],
+          [
+            1
+          ],
+          [
             11,
-            10
+            10,
+            9
           ],
           [
-            6,
             5,
-            4,
-            7
+            8,
+            7,
+            6
           ],
           [
-            3,
-            2,
-            1,
             0
+          ],
+          [
+            3
+          ],
+          [
+            2
           ]
         ],
-        "operations_count": 78,
-        "execution_time_ms": 0.0347
+        "sizes": [
+          1,
+          1,
+          3,
+          4,
+          1,
+          1,
+          1
+        ],
+        "operations_count": 74,
+        "execution_time_ms": 0.0153
       },
       "condensation_graph": {
-        "vertices": 3,
-        "edges": 2
+        "vertices": 7,
+        "edges": 9
       },
       "topological_sort": {
-        "topological_order": [
+        "component_order": [
+          4,
+          6,
+          1,
+          5,
+          0,
+          3,
+          2
+        ],
+        "vertex_order": [
+          0,
           2,
           1,
-          0
+          3,
+          4,
+          5,
+          8,
+          7,
+          6,
+          11,
+          10,
+          9
         ],
-        "operations_count": 8,
-        "execution_time_ms": 0.0066
+        "operations_count": 23,
+        "execution_time_ms": 0.0089
       },
       "shortest_path": {
         "source": 0,
+        "source_scc": 4,
+        "target_scc": 0,
         "path": [
-          2,
-          1,
+          4,
           0
         ],
         "edges": [
           {
-            "u": 2,
-            "v": 1,
-            "w": 2.5
-          },
-          {
-            "u": 1,
+            "u": 4,
             "v": 0,
-            "w": 7.5
+            "w": 5.5
           }
         ],
-        "path_length": 10.0,
-        "operations_count": 6,
-        "execution_time_ms": 0.0202,
-        "total_operations_count": 92,
-        "total_execution_time_ms": 0.0615
+        "path_length": 5.5,
+        "operations_count": 16,
+        "execution_time_ms": 0.0233,
+        "total_operations_count": 113,
+        "total_execution_time_ms": 0.0475
       },
       "longest_path": {
-        "critical_path_length": 10.0,
+        "critical_path_length": 23.4,
         "critical_path": [
-          2,
-          1,
-          0
+          6,
+          5,
+          3,
+          2
         ],
         "edges": [
           {
-            "u": 2,
-            "v": 1,
-            "w": 2.5
+            "u": 6,
+            "v": 5,
+            "w": 8.2
           },
           {
-            "u": 1,
-            "v": 0,
-            "w": 7.5
+            "u": 5,
+            "v": 3,
+            "w": 7.1
+          },
+          {
+            "u": 3,
+            "v": 2,
+            "w": 8.1
           }
         ],
-        "operations_count": 9,
-        "execution_time_ms": 0.0272,
-        "total_operations_count": 95,
-        "total_execution_time_ms": 0.0685
+        "operations_count": 45,
+        "execution_time_ms": 0.0503,
+        "total_operations_count": 142,
+        "total_execution_time_ms": 0.0745
       }
     },
     {
@@ -348,119 +430,174 @@
         "source": 0
       },
       "tarjan_scc": {
-        "num_sccs": 5,
+        "num_sccs": 9,
         "sccs": [
+          [
+            12
+          ],
           [
             14,
             13,
             15
           ],
           [
-            10,
-            12,
             11
           ],
           [
-            9,
-            8,
-            7
+            10
           ],
           [
+            7,
             6,
             5,
-            4
+            8
           ],
           [
             3,
             2,
-            1,
+            4
+          ],
+          [
+            1
+          ],
+          [
             0
+          ],
+          [
+            9
           ]
         ],
-        "operations_count": 101,
-        "execution_time_ms": 0.0245
+        "sizes": [
+          1,
+          3,
+          1,
+          1,
+          4,
+          3,
+          1,
+          1,
+          1
+        ],
+        "operations_count": 99,
+        "execution_time_ms": 0.0228
       },
       "condensation_graph": {
-        "vertices": 5,
-        "edges": 7
+        "vertices": 9,
+        "edges": 12
       },
       "topological_sort": {
-        "topological_order": [
+        "component_order": [
+          7,
+          8,
+          6,
+          5,
           4,
           3,
           2,
-          1,
-          0
+          0,
+          1
         ],
-        "operations_count": 17,
-        "execution_time_ms": 0.0067
+        "vertex_order": [
+          0,
+          9,
+          1,
+          3,
+          2,
+          4,
+          7,
+          6,
+          5,
+          8,
+          10,
+          11,
+          12,
+          14,
+          13,
+          15
+        ],
+        "operations_count": 30,
+        "execution_time_ms": 0.007
       },
       "shortest_path": {
         "source": 0,
+        "source_scc": 7,
+        "target_scc": 2,
         "path": [
-          4,
+          7,
+          6,
+          5,
+          3,
+          2
+        ],
+        "edges": [
+          {
+            "u": 7,
+            "v": 6,
+            "w": 1.7
+          },
+          {
+            "u": 6,
+            "v": 5,
+            "w": 5.9
+          },
+          {
+            "u": 5,
+            "v": 3,
+            "w": 4.1
+          },
+          {
+            "u": 3,
+            "v": 2,
+            "w": 7.8
+          }
+        ],
+        "path_length": 19.5,
+        "operations_count": 27,
+        "execution_time_ms": 0.0341,
+        "total_operations_count": 156,
+        "total_execution_time_ms": 0.0639
+      },
+      "longest_path": {
+        "critical_path_length": 24.4,
+        "critical_path": [
+          7,
+          6,
+          5,
           3,
           2,
           1
         ],
         "edges": [
           {
-            "u": 4,
+            "u": 7,
+            "v": 6,
+            "w": 1.7
+          },
+          {
+            "u": 6,
+            "v": 5,
+            "w": 5.9
+          },
+          {
+            "u": 5,
             "v": 3,
-            "w": 6.9
+            "w": 4.1
           },
           {
             "u": 3,
             "v": 2,
-            "w": 7.5
+            "w": 7.8
           },
           {
             "u": 2,
             "v": 1,
-            "w": 3.3
+            "w": 4.9
           }
         ],
-        "path_length": 17.7,
-        "operations_count": 18,
-        "execution_time_ms": 0.0192,
-        "total_operations_count": 136,
-        "total_execution_time_ms": 0.0504
-      },
-      "longest_path": {
-        "critical_path_length": 23.5,
-        "critical_path": [
-          4,
-          3,
-          2,
-          1,
-          0
-        ],
-        "edges": [
-          {
-            "u": 4,
-            "v": 3,
-            "w": 6.9
-          },
-          {
-            "u": 3,
-            "v": 2,
-            "w": 7.5
-          },
-          {
-            "u": 2,
-            "v": 1,
-            "w": 3.3
-          },
-          {
-            "u": 1,
-            "v": 0,
-            "w": 5.8
-          }
-        ],
-        "operations_count": 48,
-        "execution_time_ms": 0.031,
-        "total_operations_count": 166,
-        "total_execution_time_ms": 0.062200000000000005
+        "operations_count": 107,
+        "execution_time_ms": 0.1144,
+        "total_operations_count": 236,
+        "total_execution_time_ms": 0.1442
       }
     },
     {
@@ -473,93 +610,196 @@
         "source": 0
       },
       "tarjan_scc": {
-        "num_sccs": 3,
+        "num_sccs": 11,
         "sccs": [
           [
-            14,
-            19,
-            18,
+            4
+          ],
+          [
             17,
-            16,
-            15
+            19,
+            18
+          ],
+          [
+            10
+          ],
+          [
+            15,
+            14,
+            16
           ],
           [
             13,
             12,
-            11,
-            10,
-            9,
-            8,
-            7
+            11
           ],
           [
-            6,
+            8,
+            9
+          ],
+          [
             5,
-            4,
-            3,
-            2,
-            1,
+            7,
+            6
+          ],
+          [
+            3
+          ],
+          [
+            1
+          ],
+          [
             0
+          ],
+          [
+            2
           ]
         ],
-        "operations_count": 131,
-        "execution_time_ms": 0.0231
+        "sizes": [
+          1,
+          3,
+          1,
+          3,
+          3,
+          2,
+          3,
+          1,
+          1,
+          1,
+          1
+        ],
+        "operations_count": 120,
+        "execution_time_ms": 0.0545
       },
       "condensation_graph": {
-        "vertices": 3,
-        "edges": 3
+        "vertices": 11,
+        "edges": 21
       },
       "topological_sort": {
-        "topological_order": [
+        "component_order": [
+          9,
+          10,
+          8,
+          7,
+          0,
+          6,
+          5,
+          2,
+          4,
+          3,
+          1
+        ],
+        "vertex_order": [
+          0,
           2,
           1,
-          0
+          3,
+          4,
+          5,
+          7,
+          6,
+          8,
+          9,
+          10,
+          13,
+          12,
+          11,
+          15,
+          14,
+          16,
+          17,
+          19,
+          18
         ],
-        "operations_count": 9,
-        "execution_time_ms": 0.0062
+        "operations_count": 43,
+        "execution_time_ms": 0.0108
       },
       "shortest_path": {
         "source": 0,
+        "source_scc": 9,
+        "target_scc": 0,
         "path": [
-          2,
+          9,
+          8,
+          7,
           0
         ],
         "edges": [
           {
-            "u": 2,
-            "v": 0,
-            "w": 4.8
-          }
-        ],
-        "path_length": 4.8,
-        "operations_count": 8,
-        "execution_time_ms": 0.016,
-        "total_operations_count": 148,
-        "total_execution_time_ms": 0.0453
-      },
-      "longest_path": {
-        "critical_path_length": 11.100000000000001,
-        "critical_path": [
-          2,
-          1,
-          0
-        ],
-        "edges": [
-          {
-            "u": 2,
-            "v": 1,
-            "w": 6.9
+            "u": 9,
+            "v": 8,
+            "w": 6.3
           },
           {
-            "u": 1,
+            "u": 8,
+            "v": 7,
+            "w": 8.9
+          },
+          {
+            "u": 7,
             "v": 0,
-            "w": 4.2
+            "w": 9.2
           }
         ],
-        "operations_count": 12,
-        "execution_time_ms": 0.0222,
-        "total_operations_count": 152,
-        "total_execution_time_ms": 0.051500000000000004
+        "path_length": 24.4,
+        "operations_count": 47,
+        "execution_time_ms": 0.0382,
+        "total_operations_count": 210,
+        "total_execution_time_ms": 0.1035
+      },
+      "longest_path": {
+        "critical_path_length": 45.9,
+        "critical_path": [
+          9,
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          1
+        ],
+        "edges": [
+          {
+            "u": 9,
+            "v": 8,
+            "w": 6.3
+          },
+          {
+            "u": 8,
+            "v": 7,
+            "w": 8.9
+          },
+          {
+            "u": 7,
+            "v": 6,
+            "w": 9.8
+          },
+          {
+            "u": 6,
+            "v": 5,
+            "w": 4.0
+          },
+          {
+            "u": 5,
+            "v": 4,
+            "w": 7.0
+          },
+          {
+            "u": 4,
+            "v": 3,
+            "w": 3.1
+          },
+          {
+            "u": 3,
+            "v": 1,
+            "w": 6.8
+          }
+        ],
+        "operations_count": 237,
+        "execution_time_ms": 0.0858,
+        "total_operations_count": 400,
+        "total_execution_time_ms": 0.1511
       }
     },
     {
@@ -572,62 +812,69 @@
         "source": 8
       },
       "tarjan_scc": {
-        "num_sccs": 9,
+        "num_sccs": 8,
         "sccs": [
           [
-            23,
-            24
+            22,
+            24,
+            23
           ],
           [
             21,
-            22
-          ],
-          [
-            18,
             20,
             19
           ],
           [
-            15,
+            18,
             17,
             16
           ],
           [
-            14,
             13,
-            12
+            15,
+            14
           ],
           [
+            12,
             11,
-            10,
-            9
+            10
           ],
           [
-            7,
-            6,
-            8
+            9,
+            8,
+            7
           ],
           [
             4,
-            3,
+            6,
             5
           ],
           [
+            3,
             2,
             1,
             0
           ]
         ],
-        "operations_count": 162,
-        "execution_time_ms": 0.0269
+        "sizes": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          4
+        ],
+        "operations_count": 160,
+        "execution_time_ms": 0.0746
       },
       "condensation_graph": {
-        "vertices": 9,
-        "edges": 11
+        "vertices": 8,
+        "edges": 12
       },
       "topological_sort": {
-        "topological_order": [
-          8,
+        "component_order": [
           7,
           6,
           5,
@@ -637,13 +884,41 @@
           1,
           0
         ],
-        "operations_count": 29,
-        "execution_time_ms": 0.0089
+        "vertex_order": [
+          3,
+          2,
+          1,
+          0,
+          4,
+          6,
+          5,
+          9,
+          8,
+          7,
+          12,
+          11,
+          10,
+          13,
+          15,
+          14,
+          18,
+          17,
+          16,
+          21,
+          20,
+          19,
+          22,
+          24,
+          23
+        ],
+        "operations_count": 28,
+        "execution_time_ms": 0.0073
       },
       "shortest_path": {
         "source": 8,
+        "source_scc": 5,
+        "target_scc": 0,
         "path": [
-          6,
           5,
           4,
           3,
@@ -653,46 +928,40 @@
         ],
         "edges": [
           {
-            "u": 6,
-            "v": 5,
-            "w": 7.4
-          },
-          {
             "u": 5,
             "v": 4,
-            "w": 3.1
+            "w": 8.5
           },
           {
             "u": 4,
             "v": 3,
-            "w": 1.3
+            "w": 7.2
           },
           {
             "u": 3,
             "v": 2,
-            "w": 8.8
+            "w": 9.8
           },
           {
             "u": 2,
             "v": 1,
-            "w": 8.1
+            "w": 6.1
           },
           {
             "u": 1,
             "v": 0,
-            "w": 6.2
+            "w": 7.3
           }
         ],
-        "path_length": 34.900000000000006,
-        "operations_count": 18,
-        "execution_time_ms": 0.0327,
-        "total_operations_count": 209,
-        "total_execution_time_ms": 0.0685
+        "path_length": 38.9,
+        "operations_count": 15,
+        "execution_time_ms": 0.0283,
+        "total_operations_count": 203,
+        "total_execution_time_ms": 0.11019999999999999
       },
       "longest_path": {
-        "critical_path_length": 39.800000000000004,
+        "critical_path_length": 48.0,
         "critical_path": [
-          8,
           7,
           6,
           5,
@@ -704,50 +973,45 @@
         ],
         "edges": [
           {
-            "u": 8,
-            "v": 7,
-            "w": 1.7
-          },
-          {
             "u": 7,
             "v": 6,
-            "w": 3.2
+            "w": 2.3
           },
           {
             "u": 6,
             "v": 5,
-            "w": 7.4
+            "w": 6.8
           },
           {
             "u": 5,
             "v": 4,
-            "w": 3.1
+            "w": 8.5
           },
           {
             "u": 4,
             "v": 3,
-            "w": 1.3
+            "w": 7.2
           },
           {
             "u": 3,
             "v": 2,
-            "w": 8.8
+            "w": 9.8
           },
           {
             "u": 2,
             "v": 1,
-            "w": 8.1
+            "w": 6.1
           },
           {
             "u": 1,
             "v": 0,
-            "w": 6.2
+            "w": 7.3
           }
         ],
-        "operations_count": 120,
-        "execution_time_ms": 0.0695,
-        "total_operations_count": 311,
-        "total_execution_time_ms": 0.1053
+        "operations_count": 105,
+        "execution_time_ms": 0.1259,
+        "total_operations_count": 293,
+        "total_execution_time_ms": 0.2078
       }
     },
     {
@@ -769,225 +1033,301 @@
             21
           ],
           [
-            23
-          ],
-          [
-            32
-          ],
-          [
             14
           ],
           [
             29
           ],
           [
-            31
+            7
           ],
           [
             24
           ],
           [
-            7
-          ],
-          [
-            30
-          ],
-          [
-            22
-          ],
-          [
-            20
-          ],
-          [
-            9
-          ],
-          [
-            16
-          ],
-          [
-            0
-          ],
-          [
-            17
-          ],
-          [
-            1
-          ],
-          [
-            15
-          ],
-          [
-            2
-          ],
-          [
-            18
-          ],
-          [
-            34
-          ],
-          [
-            3
-          ],
-          [
-            26
-          ],
-          [
-            4
-          ],
-          [
-            8
-          ],
-          [
-            5
-          ],
-          [
-            6
-          ],
-          [
-            10
-          ],
-          [
-            11
+            31
           ],
           [
             12
           ],
           [
+            30
+          ],
+          [
+            34
+          ],
+          [
+            0
+          ],
+          [
+            26
+          ],
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            22
+          ],
+          [
+            17
+          ],
+          [
+            3
+          ],
+          [
+            9
+          ],
+          [
+            4
+          ],
+          [
+            5
+          ],
+          [
+            20
+          ],
+          [
             19
           ],
           [
-            13
+            6
           ],
           [
             25
           ],
           [
+            18
+          ],
+          [
+            8
+          ],
+          [
             27
+          ],
+          [
+            23
+          ],
+          [
+            10
+          ],
+          [
+            15
+          ],
+          [
+            11
+          ],
+          [
+            32
+          ],
+          [
+            13
+          ],
+          [
+            16
           ],
           [
             33
           ]
         ],
-        "operations_count": 189,
-        "execution_time_ms": 0.027
+        "sizes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "operations_count": 190,
+        "execution_time_ms": 0.0372
       },
       "condensation_graph": {
         "vertices": 35,
         "edges": 63
       },
       "topological_sort": {
-        "topological_order": [
-          14,
+        "component_order": [
+          10,
+          12,
+          13,
           16,
           18,
-          21,
-          23,
+          19,
+          22,
           25,
-          26,
-          27,
           28,
-          29,
-          31,
+          30,
           32,
           33,
           34,
-          12,
-          13,
           15,
           17,
-          22,
-          20,
-          24,
-          8,
-          19,
-          30,
-          11,
-          4,
           7,
-          10,
+          4,
+          21,
+          24,
+          20,
+          26,
+          27,
+          29,
+          31,
+          11,
+          5,
+          2,
+          6,
+          14,
+          23,
+          1,
+          9,
+          8,
+          3,
+          0
+        ],
+        "vertex_order": [
+          0,
           1,
           2,
           3,
+          4,
           5,
           6,
+          8,
+          10,
+          11,
+          13,
+          16,
+          33,
+          17,
           9,
-          0
+          12,
+          7,
+          19,
+          18,
+          20,
+          27,
+          23,
+          15,
+          32,
+          26,
+          24,
+          14,
+          31,
+          22,
+          25,
+          21,
+          34,
+          30,
+          29,
+          28
         ],
         "operations_count": 133,
-        "execution_time_ms": 0.016
+        "execution_time_ms": 0.0416
       },
       "shortest_path": {
         "source": 0,
+        "source_scc": 10,
+        "target_scc": 0,
         "path": [
-          14,
-          12,
-          11,
           10,
-          9
+          4,
+          2,
+          1,
+          0
         ],
         "edges": [
           {
-            "u": 14,
-            "v": 12,
+            "u": 10,
+            "v": 4,
+            "w": 5.5
+          },
+          {
+            "u": 4,
+            "v": 2,
+            "w": 9.2
+          },
+          {
+            "u": 2,
+            "v": 1,
             "w": 3.5
           },
           {
-            "u": 12,
-            "v": 11,
-            "w": 6.7
-          },
-          {
-            "u": 11,
-            "v": 10,
-            "w": 9.7
-          },
-          {
-            "u": 10,
-            "v": 9,
-            "w": 6.9
+            "u": 1,
+            "v": 0,
+            "w": 4.0
           }
         ],
-        "path_length": 26.799999999999997,
-        "operations_count": 64,
-        "execution_time_ms": 0.0401,
-        "total_operations_count": 386,
-        "total_execution_time_ms": 0.0831
+        "path_length": 22.2,
+        "operations_count": 38,
+        "execution_time_ms": 0.0388,
+        "total_operations_count": 361,
+        "total_execution_time_ms": 0.1176
       },
       "longest_path": {
-        "critical_path_length": 26.799999999999997,
+        "critical_path_length": 24.2,
         "critical_path": [
-          14,
-          12,
-          11,
-          10,
-          9
+          16,
+          4,
+          2,
+          1,
+          0
         ],
         "edges": [
           {
-            "u": 14,
-            "v": 12,
+            "u": 16,
+            "v": 4,
+            "w": 7.5
+          },
+          {
+            "u": 4,
+            "v": 2,
+            "w": 9.2
+          },
+          {
+            "u": 2,
+            "v": 1,
             "w": 3.5
           },
           {
-            "u": 12,
-            "v": 11,
-            "w": 6.7
-          },
-          {
-            "u": 11,
-            "v": 10,
-            "w": 9.7
-          },
-          {
-            "u": 10,
-            "v": 9,
-            "w": 6.9
+            "u": 1,
+            "v": 0,
+            "w": 4.0
           }
         ],
-        "operations_count": 615,
-        "execution_time_ms": 0.6447,
-        "total_operations_count": 937,
-        "total_execution_time_ms": 0.6877000000000001
+        "operations_count": 491,
+        "execution_time_ms": 0.5757,
+        "total_operations_count": 814,
+        "total_execution_time_ms": 0.6545
       }
     },
     {
@@ -1003,46 +1343,47 @@
         "num_sccs": 6,
         "sccs": [
           [
+            46,
             45,
             44,
             43,
             42,
             49,
             48,
-            47,
-            46
+            47
           ],
           [
+            40,
             39,
             38,
             37,
             36,
             35,
             34,
-            41,
-            40
+            41
           ],
           [
-            28,
-            27,
-            26,
             33,
             32,
             31,
             30,
-            29
+            29,
+            28,
+            27,
+            26
           ],
           [
+            18,
             25,
             24,
             23,
             22,
             21,
             20,
-            19,
-            18
+            19
           ],
           [
+            9,
             17,
             16,
             15,
@@ -1050,8 +1391,7 @@
             13,
             12,
             11,
-            10,
-            9
+            10
           ],
           [
             8,
@@ -1065,15 +1405,23 @@
             0
           ]
         ],
+        "sizes": [
+          8,
+          8,
+          8,
+          8,
+          9,
+          9
+        ],
         "operations_count": 329,
-        "execution_time_ms": 0.0378
+        "execution_time_ms": 0.0334
       },
       "condensation_graph": {
         "vertices": 6,
         "edges": 6
       },
       "topological_sort": {
-        "topological_order": [
+        "component_order": [
           5,
           4,
           3,
@@ -1081,11 +1429,65 @@
           1,
           0
         ],
+        "vertex_order": [
+          8,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1,
+          0,
+          9,
+          17,
+          16,
+          15,
+          14,
+          13,
+          12,
+          11,
+          10,
+          18,
+          25,
+          24,
+          23,
+          22,
+          21,
+          20,
+          19,
+          33,
+          32,
+          31,
+          30,
+          29,
+          28,
+          27,
+          26,
+          40,
+          39,
+          38,
+          37,
+          36,
+          35,
+          34,
+          41,
+          46,
+          45,
+          44,
+          43,
+          42,
+          49,
+          48,
+          47
+        ],
         "operations_count": 18,
-        "execution_time_ms": 0.0408
+        "execution_time_ms": 0.0509
       },
       "shortest_path": {
         "source": 16,
+        "source_scc": 4,
+        "target_scc": 0,
         "path": [
           4,
           3,
@@ -1096,27 +1498,27 @@
           {
             "u": 4,
             "v": 3,
-            "w": 3.7
+            "w": 6.5
           },
           {
             "u": 3,
             "v": 1,
-            "w": 6.8
+            "w": 4.3
           },
           {
             "u": 1,
             "v": 0,
-            "w": 6.3
+            "w": 9.1
           }
         ],
-        "path_length": 16.8,
+        "path_length": 19.9,
         "operations_count": 14,
-        "execution_time_ms": 0.026,
+        "execution_time_ms": 0.0375,
         "total_operations_count": 361,
-        "total_execution_time_ms": 0.1046
+        "total_execution_time_ms": 0.12179999999999999
       },
       "longest_path": {
-        "critical_path_length": 23.5,
+        "critical_path_length": 33.4,
         "critical_path": [
           5,
           4,
@@ -1129,33 +1531,33 @@
           {
             "u": 5,
             "v": 4,
-            "w": 4.7
+            "w": 1.9
           },
           {
             "u": 4,
             "v": 3,
-            "w": 3.7
+            "w": 6.5
           },
           {
             "u": 3,
             "v": 2,
-            "w": 2.1
+            "w": 6.7
           },
           {
             "u": 2,
             "v": 1,
-            "w": 6.7
+            "w": 9.2
           },
           {
             "u": 1,
             "v": 0,
-            "w": 6.3
+            "w": 9.1
           }
         ],
         "operations_count": 54,
-        "execution_time_ms": 0.0472,
+        "execution_time_ms": 0.193,
         "total_operations_count": 401,
-        "total_execution_time_ms": 0.1258
+        "total_execution_time_ms": 0.2773
       }
     }
   ]
