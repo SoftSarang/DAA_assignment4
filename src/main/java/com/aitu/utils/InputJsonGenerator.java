@@ -18,7 +18,7 @@ public class InputJsonGenerator {
     private final Gson gson;
 
     public InputJsonGenerator() {
-        this.random = new Random();
+        this.random = new Random(42);
         this.gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
@@ -33,12 +33,11 @@ public class InputJsonGenerator {
 
         int targetEdges;
         if (isDense) {
-            targetEdges = Math.min(nodeCount * 4, nodeCount * (nodeCount - 1) / 3);
+            targetEdges = Math.min(nodeCount * 4, nodeCount * (nodeCount - 1) / 2);
         } else {
             targetEdges = (int)(nodeCount * 1.8);
         }
 
-        // Generate based on variant
         switch (variant) {
             case "pure_dag":
                 generatePureDAG(nodeCount, targetEdges, edges, edgeSet);
@@ -50,10 +49,10 @@ public class InputJsonGenerator {
                 generateTwoCycles(nodeCount, targetEdges, edges, edgeSet);
                 break;
             case "mixed":
-                generateSeveralSCCs(nodeCount, targetEdges, edges, edgeSet, 3, 5);
+                generateMixed(nodeCount, targetEdges, edges, edgeSet, isDense);
                 break;
             case "many_sccs":
-                generateSeveralSCCs(nodeCount, targetEdges, edges, edgeSet, 5, 10);
+                generateManySCCs(nodeCount, targetEdges, edges, edgeSet, isDense);
                 break;
         }
 
@@ -95,12 +94,10 @@ public class InputJsonGenerator {
         int[] level = new int[n];
         int numLevels = Math.max(3, (int)Math.sqrt(n));
 
-        // Assign levels: vertices with lower indices get lower levels
         for (int i = 0; i < n; i++) {
             level[i] = (i * numLevels) / n;
         }
 
-        // Add edges respecting levels (ensures acyclic)
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (level[j] > level[i]) {
@@ -110,9 +107,8 @@ public class InputJsonGenerator {
             }
         }
 
-        // Fill remaining edges randomly while respecting DAG property
         int attempts = 0;
-        int maxAttempts = 10000;
+        int maxAttempts = targetEdges * 10;
         while (edges.size() < targetEdges && attempts < maxAttempts) {
             int u = random.nextInt(n);
             int v = random.nextInt(n);
@@ -127,15 +123,13 @@ public class InputJsonGenerator {
      * Generates single cycle: 0->1->2->...->n-1->0
      */
     private void generateOneCycle(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
-        // Create cycle
         for (int i = 0; i < n - 1; i++) {
             addEdge(i, i + 1, edges, edgeSet);
         }
         addEdge(n - 1, 0, edges, edgeSet);
 
-        // Add random edges to reach target
         int attempts = 0;
-        int maxAttempts = 10000;
+        int maxAttempts = targetEdges * 10;
         while (edges.size() < targetEdges && attempts < maxAttempts) {
             int u = random.nextInt(n);
             int v = random.nextInt(n);
@@ -152,24 +146,20 @@ public class InputJsonGenerator {
     private void generateTwoCycles(int n, int targetEdges, JsonArray edges, Set<String> edgeSet) {
         int split = n / 2;
 
-        // First cycle: 0->1->...->split-1->0
         for (int i = 0; i < split - 1; i++) {
             addEdge(i, i + 1, edges, edgeSet);
         }
         addEdge(split - 1, 0, edges, edgeSet);
 
-        // Second cycle: split->...->n-1->split
         for (int i = split; i < n - 1; i++) {
             addEdge(i, i + 1, edges, edgeSet);
         }
         addEdge(n - 1, split, edges, edgeSet);
 
-        // Connect cycles
         addEdge(random.nextInt(split), split + random.nextInt(n - split), edges, edgeSet);
 
-        // Fill remaining edges
         int attempts = 0;
-        int maxAttempts = 10000;
+        int maxAttempts = targetEdges * 10;
         while (edges.size() < targetEdges && attempts < maxAttempts) {
             int u = random.nextInt(n);
             int v = random.nextInt(n);
@@ -182,78 +172,306 @@ public class InputJsonGenerator {
     }
 
     /**
-     * Generates multiple SCCs connected in a DAG structure
+     * Generates mixed graph
      */
-    private int generateSeveralSCCs(int n, int targetEdges, JsonArray edges,
-                                    Set<String> edgeSet, int minSCCs, int maxSCCs) {
-        int numSCCs = minSCCs + random.nextInt(maxSCCs - minSCCs + 1);
-        numSCCs = Math.min(numSCCs, n / 2);
+    private void generateMixed(int n, int targetEdges, JsonArray edges, Set<String> edgeSet, boolean isDense) {
 
-        List<List<Integer>> sccs = new ArrayList<>();
-        int verticesPerSCC = n / numSCCs;
-        int remainder = n % numSCCs;
+        int minSingletons = Math.max(2, n / 8);
+        int minCyclicVertices = Math.max(4, n / 3);
+
+        List<List<Integer>> components = new ArrayList<>();
         int current = 0;
 
-        for (int i = 0; i < numSCCs; i++) {
-            int size = verticesPerSCC + (i < remainder ? 1 : 0);
-            List<Integer> scc = new ArrayList<>();
-            for (int j = 0; j < size; j++) {
-                scc.add(current++);
-            }
-            sccs.add(scc);
+        for (int i = 0; i < minSingletons && current < n; i++) {
+            List<Integer> singleton = new ArrayList<>();
+            singleton.add(current++);
+            components.add(singleton);
         }
 
-        for (List<Integer> scc : sccs) {
-            if (scc.size() == 1) continue;
-            for (int i = 0; i < scc.size() - 1; i++) {
-                addEdge(scc.get(i), scc.get(i + 1), edges, edgeSet);
+        if (current < n) {
+            int cyclicSize = Math.min(Math.max(3, minCyclicVertices / 2), n - current);
+            List<Integer> cyclicComp = new ArrayList<>();
+            for (int i = 0; i < cyclicSize && current < n; i++) {
+                cyclicComp.add(current++);
             }
-            addEdge(scc.get(scc.size() - 1), scc.get(0), edges, edgeSet);
+            if (!cyclicComp.isEmpty()) {
+                components.add(cyclicComp);
+            }
         }
 
-        for (int i = 0; i < numSCCs - 1; i++) {
-            List<Integer> from = sccs.get(i);
-            List<Integer> to = sccs.get(i + 1);
-            int u = from.get(random.nextInt(from.size()));
-            int v = to.get(random.nextInt(to.size()));
+        if (current < n) {
+            int remaining = n - current;
+            int numRemainingComps = Math.max(1, remaining / 3);
+
+            List<List<Integer>> remainingComps = partitionVertices(remaining, numRemainingComps);
+            for (List<Integer> comp : remainingComps) {
+                List<Integer> adjustedComp = new ArrayList<>();
+                for (int v : comp) {
+                    adjustedComp.add(v + current);
+                }
+                components.add(adjustedComp);
+            }
+        }
+
+        int cyclicCreated = 0;
+        int acyclicCreated = 0;
+
+        for (int i = 0; i < components.size(); i++) {
+            List<Integer> comp = components.get(i);
+
+            if (comp.size() == 1) {
+                acyclicCreated++;
+                continue;
+            }
+
+            boolean shouldBeCyclic;
+            if (i < 2) {
+                shouldBeCyclic = (i == 1);
+            } else {
+                shouldBeCyclic = (i % 2 == 1);
+            }
+
+            if (shouldBeCyclic) {
+                if (comp.size() >= 4) {
+                    createComplexSCC(comp, edges, edgeSet, isDense);
+                } else {
+                    createSimpleCycle(comp, edges, edgeSet);
+                }
+                cyclicCreated++;
+            } else {
+                createStrictlyAcyclicComponent(comp, edges, edgeSet, isDense);
+                acyclicCreated++;
+            }
+        }
+
+        connectComponentsAsDAG(components, edges, edgeSet);
+
+        fillRemainingEdgesMixed(components, targetEdges, edges, edgeSet, isDense);
+    }
+
+    private void fillRemainingEdgesMixed(List<List<Integer>> components, int targetEdges,
+                                         JsonArray edges, Set<String> edgeSet, boolean isDense) {
+        int attempts = 0;
+        int maxAttempts = targetEdges * 20;
+
+        while (edges.size() < targetEdges && attempts < maxAttempts) {
+            if (random.nextDouble() < 0.9) {
+                addEdgeWithinComponentsMixed(components, edges, edgeSet);
+            } else {
+                addEdgeBetweenComponentsDAG(components, edges, edgeSet);
+            }
+            attempts++;
+        }
+    }
+
+    private void addEdgeWithinComponentsMixed(List<List<Integer>> components, JsonArray edges, Set<String> edgeSet) {
+        List<List<Integer>> multiVertexComponents = new ArrayList<>();
+        for (List<Integer> comp : components) {
+            if (comp.size() >= 2) {
+                multiVertexComponents.add(comp);
+            }
+        }
+
+        if (multiVertexComponents.isEmpty()) return;
+
+        List<Integer> component = multiVertexComponents.get(random.nextInt(multiVertexComponents.size()));
+        int u = component.get(random.nextInt(component.size()));
+        int v = component.get(random.nextInt(component.size()));
+        if (u != v) {
             addEdge(u, v, edges, edgeSet);
         }
+    }
 
-        for (int i = 0; i < numSCCs - 1; i++) {
-            List<Integer> from = sccs.get(i);
-            for (int j = i + 2; j < numSCCs && edges.size() < targetEdges * 0.8; j++) {
-                List<Integer> to = sccs.get(j);
-                if (random.nextDouble() < 0.5) {
+    /**
+     * Generates many SCCs
+     */
+    private void generateManySCCs(int n, int targetEdges, JsonArray edges, Set<String> edgeSet, boolean isDense) {
+        int numSCCs = Math.max(5, 5 + random.nextInt(6));
+        numSCCs = Math.min(numSCCs, n / 2);
+
+        List<List<Integer>> sccs = partitionVertices(n, numSCCs);
+
+        for (List<Integer> scc : sccs) {
+            if (scc.size() == 1) {
+                addEdge(scc.get(0), scc.get(0), edges, edgeSet);
+            } else if (scc.size() <= 3) {
+                createSimpleCycle(scc, edges, edgeSet);
+            } else {
+                createComplexSCC(scc, edges, edgeSet, isDense);
+            }
+        }
+
+        connectComponentsAsDAG(sccs, edges, edgeSet);
+
+        fillRemainingEdgesSafely(sccs, targetEdges, edges, edgeSet, isDense);
+    }
+
+    private List<List<Integer>> partitionVertices(int n, int numComponents) {
+        List<List<Integer>> components = new ArrayList<>();
+        int verticesPerComponent = n / numComponents;
+        int remainder = n % numComponents;
+        int current = 0;
+
+        for (int i = 0; i < numComponents; i++) {
+            int size = verticesPerComponent + (i < remainder ? 1 : 0);
+            size = Math.max(1, size);
+            List<Integer> component = new ArrayList<>();
+            for (int j = 0; j < size && current < n; j++) {
+                component.add(current++);
+            }
+            if (!component.isEmpty()) {
+                components.add(component);
+            }
+        }
+        return components;
+    }
+
+    private void createSimpleCycle(List<Integer> vertices, JsonArray edges, Set<String> edgeSet) {
+        if (vertices.isEmpty()) return;
+
+        for (int i = 0; i < vertices.size() - 1; i++) {
+            addEdge(vertices.get(i), vertices.get(i + 1), edges, edgeSet);
+        }
+        addEdge(vertices.get(vertices.size() - 1), vertices.get(0), edges, edgeSet);
+    }
+
+    private void createComplexSCC(List<Integer> vertices, JsonArray edges, Set<String> edgeSet, boolean isDense) {
+        createSimpleCycle(vertices, edges, edgeSet);
+
+        int maxPossible = vertices.size() * (vertices.size() - 1);
+        int additionalEdges;
+
+        if (isDense) {
+            additionalEdges = Math.min(maxPossible / 2, vertices.size() * 2);
+        } else {
+            additionalEdges = Math.min(maxPossible / 4, vertices.size() / 2 + 1);
+        }
+
+        int attempts = 0;
+        int maxAttempts = additionalEdges * 10;
+        while (attempts < maxAttempts && additionalEdges > 0) {
+            int u = vertices.get(random.nextInt(vertices.size()));
+            int v = vertices.get(random.nextInt(vertices.size()));
+            if (u != v) {
+                if (addEdge(u, v, edges, edgeSet)) {
+                    additionalEdges--;
+                }
+            }
+            attempts++;
+        }
+    }
+
+    private void createStrictlyAcyclicComponent(List<Integer> vertices, JsonArray edges, Set<String> edgeSet, boolean isDense) {
+        if (vertices.isEmpty()) return;
+
+        List<Integer> sorted = new ArrayList<>(vertices);
+        Collections.sort(sorted);
+
+        if (sorted.size() == 1) {
+            return;
+        }
+
+        for (int i = 0; i < sorted.size() - 1; i++) {
+            addEdge(sorted.get(i), sorted.get(i + 1), edges, edgeSet);
+        }
+
+        if (sorted.size() > 2) {
+            if (isDense) {
+                for (int i = 0; i < sorted.size() - 2; i++) {
+                    for (int j = i + 2; j < sorted.size(); j++) {
+                        if (random.nextDouble() < 0.4) {
+                            addEdge(sorted.get(i), sorted.get(j), edges, edgeSet);
+                        }
+                    }
+                }
+            } else {
+                for (int i = 0; i < sorted.size() - 2; i++) {
+                    if (random.nextDouble() < 0.3) {
+                        int j = i + 2 + random.nextInt(sorted.size() - i - 2);
+                        addEdge(sorted.get(i), sorted.get(j), edges, edgeSet);
+                    }
+                }
+            }
+        }
+    }
+
+    private void connectComponentsAsDAG(List<List<Integer>> components, JsonArray edges, Set<String> edgeSet) {
+        for (int i = 0; i < components.size() - 1; i++) {
+            List<Integer> from = components.get(i);
+            List<Integer> to = components.get(i + 1);
+
+            if (!from.isEmpty() && !to.isEmpty()) {
+                int u = from.get(random.nextInt(from.size()));
+                int v = to.get(random.nextInt(to.size()));
+                addEdge(u, v, edges, edgeSet);
+            }
+        }
+
+        for (int i = 0; i < components.size() - 1; i++) {
+            List<Integer> from = components.get(i);
+            for (int j = i + 2; j < components.size(); j++) {
+                List<Integer> to = components.get(j);
+                if (random.nextDouble() < 0.3 && !from.isEmpty() && !to.isEmpty()) {
                     int u = from.get(random.nextInt(from.size()));
                     int v = to.get(random.nextInt(to.size()));
                     addEdge(u, v, edges, edgeSet);
                 }
             }
         }
+    }
 
+    private void fillRemainingEdgesSafely(List<List<Integer>> components, int targetEdges,
+                                          JsonArray edges, Set<String> edgeSet, boolean isDense) {
         int attempts = 0;
-        int maxAttempts = 10000;
+        int maxAttempts = targetEdges * 20;
 
         while (edges.size() < targetEdges && attempts < maxAttempts) {
-            int sccIdx = random.nextInt(numSCCs);
-            List<Integer> scc = sccs.get(sccIdx);
-            if (scc.size() > 1) {
-                int u = scc.get(random.nextInt(scc.size()));
-                int v = scc.get(random.nextInt(scc.size()));
-                if (u != v) {
-                    addEdge(u, v, edges, edgeSet);
-                }
+            if (random.nextDouble() < 0.9) {
+                addEdgeWithinComponents(components, edges, edgeSet);
+            } else {
+                addEdgeBetweenComponentsDAG(components, edges, edgeSet);
             }
             attempts++;
         }
+    }
 
-        return numSCCs;
+    private void addEdgeWithinComponents(List<List<Integer>> components, JsonArray edges, Set<String> edgeSet) {
+        List<Integer> component = components.get(random.nextInt(components.size()));
+
+        if (component.size() >= 2) {
+            int u = component.get(random.nextInt(component.size()));
+            int v = component.get(random.nextInt(component.size()));
+            if (u != v) {
+                addEdge(u, v, edges, edgeSet);
+            }
+        } else if (component.size() == 1) {
+            addEdge(component.get(0), component.get(0), edges, edgeSet);
+        }
+    }
+
+    private void addEdgeBetweenComponentsDAG(List<List<Integer>> components, JsonArray edges, Set<String> edgeSet) {
+        if (components.size() < 2) return;
+
+        int fromIdx = random.nextInt(components.size());
+        int toIdx = random.nextInt(components.size());
+
+        if (fromIdx < toIdx) {
+            List<Integer> fromComp = components.get(fromIdx);
+            List<Integer> toComp = components.get(toIdx);
+
+            if (!fromComp.isEmpty() && !toComp.isEmpty()) {
+                int u = fromComp.get(random.nextInt(fromComp.size()));
+                int v = toComp.get(random.nextInt(toComp.size()));
+                addEdge(u, v, edges, edgeSet);
+            }
+        }
     }
 
     /**
      * Adds edge with random weight (1.0 to 10.0) if not duplicate
+     * Returns true if edge was added, false if it was duplicate
      */
-    private void addEdge(int u, int v, JsonArray edges, Set<String> edgeSet) {
+    private boolean addEdge(int u, int v, JsonArray edges, Set<String> edgeSet) {
         String key = u + "->" + v;
         if (!edgeSet.contains(key)) {
             JsonObject edge = new JsonObject();
@@ -262,7 +480,9 @@ public class InputJsonGenerator {
             edge.addProperty("w", Math.round((1 + random.nextDouble() * 9) * 10) / 10.0);
             edges.add(edge);
             edgeSet.add(key);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -273,27 +493,17 @@ public class InputJsonGenerator {
         JsonArray graphs = new JsonArray();
         int id = 1;
 
-        if (!isDense) {
-            graphs.add(generateGraph(id++, 6, "pure_dag", false));
-            graphs.add(generateGraph(id++, 8, "one_cycle", false));
-            graphs.add(generateGraph(id++, 10, "two_cycles", false));
-            graphs.add(generateGraph(id++, 12, "mixed", false));
-            graphs.add(generateGraph(id++, 16, "mixed", false));
-            graphs.add(generateGraph(id++, 20, "mixed", false));
-            graphs.add(generateGraph(id++, 25, "many_sccs", false));
-            graphs.add(generateGraph(id++, 35, "pure_dag", false));
-            graphs.add(generateGraph(id++, 50, "many_sccs", false));
-        } else {
-            graphs.add(generateGraph(id++, 6, "pure_dag", true));
-            graphs.add(generateGraph(id++, 8, "one_cycle", true));
-            graphs.add(generateGraph(id++, 10, "two_cycles", true));
-            graphs.add(generateGraph(id++, 12, "mixed", true));
-            graphs.add(generateGraph(id++, 16, "mixed", true));
-            graphs.add(generateGraph(id++, 20, "mixed", true));
-            graphs.add(generateGraph(id++, 25, "many_sccs", true));
-            graphs.add(generateGraph(id++, 35, "pure_dag", true));
-            graphs.add(generateGraph(id++, 50, "many_sccs", true));
-        }
+        graphs.add(generateGraph(id++, 6, "pure_dag", isDense));
+        graphs.add(generateGraph(id++, 8, "one_cycle", isDense));
+        graphs.add(generateGraph(id++, 10, "two_cycles", isDense));
+
+        graphs.add(generateGraph(id++, 12, "mixed", isDense));
+        graphs.add(generateGraph(id++, 16, "mixed", isDense));
+        graphs.add(generateGraph(id++, 20, "mixed", isDense));
+
+        graphs.add(generateGraph(id++, 25, "many_sccs", isDense));
+        graphs.add(generateGraph(id++, 35, "pure_dag", isDense));
+        graphs.add(generateGraph(id++, 50, "many_sccs", isDense));
 
         root.add("graphs", graphs);
         File dir = new File("data");
@@ -302,7 +512,6 @@ public class InputJsonGenerator {
             gson.toJson(root, file);
         }
     }
-
 
     public void generateAll() throws IOException {
         generateAndSave("input_sparse.json", false);

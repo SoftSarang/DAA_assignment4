@@ -22,7 +22,11 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            List<String[]> csvData = new ArrayList<>();
+            List<String[]> sccCsvData = new ArrayList<>();
+            List<String[]> topoCsvData = new ArrayList<>();
+            List<String[]> spCsvData = new ArrayList<>();
+            List<String[]> cpCsvData = new ArrayList<>();
+            List<String[]> summaryCsvData = new ArrayList<>();
 
             JsonArray sparseResults = new JsonArray();
             JsonArray denseResults = new JsonArray();
@@ -32,18 +36,27 @@ public class Main {
 
             List<GraphData> sparseGraphs = InputReader.loadAllGraphs("data/input_sparse.json");
             for (GraphData gd : sparseGraphs) {
-                JsonObject graphResult = processGraph(gd, csvData);
+                JsonObject graphResult = processGraph(gd, sccCsvData, topoCsvData, spCsvData, cpCsvData, summaryCsvData);
                 sparseResults.add(graphResult);
             }
 
             List<GraphData> denseGraphs = InputReader.loadAllGraphs("data/input_dense.json");
             for (GraphData gd : denseGraphs) {
-                JsonObject graphResult = processGraph(gd, csvData);
+                JsonObject graphResult = processGraph(gd, sccCsvData, topoCsvData, spCsvData, cpCsvData, summaryCsvData);
                 denseResults.add(graphResult);
             }
 
-            String[][] csvArray = csvData.toArray(new String[0][]);
-            Metrics.writeCsv("data/output.csv", csvArray, false);
+            writeTaskCsv("data/output_scc.csv", sccCsvData,
+                "graph_id;vertices;edges;density;variant;operations_count;num_scc;execution_time_ms");
+            writeTaskCsv("data/output_topo.csv", topoCsvData,
+                "graph_id;vertices;edges;density;variant;operations_count;execution_time_ms");
+            writeTaskCsv("data/output_short_path.csv", spCsvData,
+                "graph_id;vertices;edges;density;variant;operations_count;path_length;execution_time_ms");
+            writeTaskCsv("data/output_critical_path.csv", cpCsvData,
+                "graph_id;vertices;edges;density;variant;operations_count;path_length;execution_time_ms");
+            writeTaskCsv("data/output_summary.csv", summaryCsvData,
+                "graph_id;vertices;edges;density;variant;num_sccs;shortest_path_length;critical_path_length;total_operations_count;total_execution_time_ms");
+
             writeJson("data/output_sparse.json", sparseResults);
             writeJson("data/output_dense.json", denseResults);
         } catch (Exception e) {
@@ -51,7 +64,13 @@ public class Main {
         }
     }
 
-    private static JsonObject processGraph(GraphData graphData, List<String[]> csvData) {
+    private static JsonObject processGraph(GraphData graphData,
+                                         List<String[]> sccCsvData,
+                                         List<String[]> topoCsvData,
+                                         List<String[]> spCsvData,
+                                         List<String[]> cpCsvData,
+                                         List<String[]> summaryCsvData) {
+
         DirectedGraph graph = graphData.getGraph();
         int id = graphData.getId();
         int source = graphData.getSource();
@@ -87,9 +106,110 @@ public class Main {
         results.cpResult = longestPath.findCriticalPath(results.dag);
         results.lpMetrics = longestPath.getMetrics();
 
-        collectCsvData(csvData, results);
+        collectTaskSpecificCsvData(sccCsvData, topoCsvData, spCsvData, cpCsvData, summaryCsvData, results);
+
         return buildJsonResult(results);
     }
+
+    private static void collectTaskSpecificCsvData(List<String[]> sccCsvData,
+                                                 List<String[]> topoCsvData,
+                                                 List<String[]> spCsvData,
+                                                 List<String[]> cpCsvData,
+                                                 List<String[]> summaryCsvData,
+                                                 GraphResults r) {
+
+        int vertices = r.graph.getN();
+        int edges = r.graph.getAllEdges().size();
+        String density = r.graphData.getDensity();
+        String variant = r.graphData.getVariant();
+        int graphId = r.id;
+
+        sccCsvData.add(new String[]{
+            String.valueOf(graphId),
+            String.valueOf(vertices),
+            String.valueOf(edges),
+            density,
+            variant,
+            String.valueOf(r.tarjanMetrics.getTotalOperations()),
+            String.valueOf(r.sccResult.getNumComponents()),
+            String.format("%.3f", r.tarjanMetrics.getExecutionTimeMs())
+        });
+
+        topoCsvData.add(new String[]{
+            String.valueOf(graphId),
+            String.valueOf(vertices),
+            String.valueOf(edges),
+            density,
+            variant,
+            String.valueOf(r.topoMetrics.getTotalOperations()),
+            String.format("%.3f", r.topoMetrics.getExecutionTimeMs())
+        });
+
+        double spLength = 0;
+        if (r.spResult != null) {
+            int dagSource = r.sccResult.getComponentId()[r.source];
+            List<Integer> spPath = buildPathFromSource(r.spResult, dagSource);
+            spLength = calculatePathLength(r.dag, spPath);
+        }
+
+        spCsvData.add(new String[]{
+            String.valueOf(graphId),
+            String.valueOf(vertices),
+            String.valueOf(edges),
+            density,
+            variant,
+            String.valueOf(r.spMetrics.getTotalOperations()),
+            String.format("%.2f", spLength),
+            String.format("%.3f", r.spMetrics.getExecutionTimeMs())
+        });
+
+        double cpLength = r.cpResult != null ? r.cpResult.getLength() : 0;
+
+        cpCsvData.add(new String[]{
+            String.valueOf(graphId),
+            String.valueOf(vertices),
+            String.valueOf(edges),
+            density,
+            variant,
+            String.valueOf(r.lpMetrics.getTotalOperations()),
+            String.format("%.2f", cpLength),
+            String.format("%.3f", r.lpMetrics.getExecutionTimeMs())
+        });
+
+        long totalOps = r.tarjanMetrics.getTotalOperations() +
+                       r.topoMetrics.getTotalOperations() +
+                       r.spMetrics.getTotalOperations() +
+                       r.lpMetrics.getTotalOperations();
+
+        double totalTime = r.tarjanMetrics.getExecutionTimeMs() +
+                          r.topoMetrics.getExecutionTimeMs() +
+                          r.spMetrics.getExecutionTimeMs() +
+                          r.lpMetrics.getExecutionTimeMs();
+
+        summaryCsvData.add(new String[]{
+            String.valueOf(graphId),
+            String.valueOf(vertices),
+            String.valueOf(edges),
+            density,
+            variant,
+            String.valueOf(r.sccResult.getNumComponents()),
+            String.format("%.2f", spLength),
+            String.format("%.2f", cpLength),
+            String.valueOf(totalOps),
+            String.format("%.3f", totalTime)
+        });
+    }
+
+    private static void writeTaskCsv(String filepath, List<String[]> csvData, String header) throws IOException {
+        try (FileWriter writer = new FileWriter(filepath)) {
+            writer.write(header + "\n");
+
+            for (String[] row : csvData) {
+                writer.write(String.join(";", row) + "\n");
+            }
+        }
+    }
+
 
     private static void cleanMemory() {
         System.gc();
@@ -202,12 +322,15 @@ public class Main {
         JsonObject tarjanJson = new JsonObject();
         tarjanJson.addProperty("num_sccs", r.sccResult.getNumComponents());
         JsonArray sccsArray = new JsonArray();
+        JsonArray sizesArray = new JsonArray();
         for (List<Integer> scc : r.sccResult.getComponents()) {
             JsonArray sccArray = new JsonArray();
             for (Integer v : scc) sccArray.add(v);
             sccsArray.add(sccArray);
+            sizesArray.add(scc.size());
         }
         tarjanJson.add("sccs", sccsArray);
+        tarjanJson.add("sizes", sizesArray);
         tarjanJson.addProperty("operations_count", r.tarjanMetrics.getTotalOperations());
         tarjanJson.addProperty("execution_time_ms", r.tarjanMetrics.getExecutionTimeMs());
         graphJson.add("tarjan_scc", tarjanJson);
@@ -218,9 +341,18 @@ public class Main {
         graphJson.add("condensation_graph", condensationJson);
 
         JsonObject topoJson = new JsonObject();
-        JsonArray topoOrder = new JsonArray();
-        for (Integer v : r.topoResult.getOrder()) topoOrder.add(v);
-        topoJson.add("topological_order", topoOrder);
+        JsonArray componentOrder = new JsonArray();
+        JsonArray vertexOrder = new JsonArray();
+        List<List<Integer>> sccs = r.sccResult.getComponents();
+
+        for (Integer v : r.topoResult.getOrder()){
+            componentOrder.add(v);
+            for (Integer vertex : sccs.get(v)) {
+                vertexOrder.add(vertex);
+            }
+        }
+        topoJson.add("component_order", componentOrder);
+        topoJson.add("vertex_order", vertexOrder);
         topoJson.addProperty("operations_count", r.topoMetrics.getTotalOperations());
         topoJson.addProperty("execution_time_ms", r.topoMetrics.getExecutionTimeMs());
         graphJson.add("topological_sort", topoJson);
@@ -228,9 +360,13 @@ public class Main {
         if (r.spResult != null) {
             JsonObject spJson = new JsonObject();
             spJson.addProperty("source", r.source);
-
             int dagSource = r.sccResult.getComponentId()[r.source];
+            spJson.addProperty("source_scc", dagSource);
             List<Integer> spPath = buildPathFromSource(r.spResult, dagSource);
+            if (!spPath.isEmpty()) {
+                int targetSCC = spPath.get(spPath.size() - 1);
+                spJson.addProperty("target_scc", targetSCC);
+            }
             JsonArray spPathArray = new JsonArray();
             for (Integer v : spPath) spPathArray.add(v);
             spJson.add("path", spPathArray);
