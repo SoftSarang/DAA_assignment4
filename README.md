@@ -384,34 +384,6 @@ Metropolitan-scale networks showed perfect alignment with theoretical prediction
 - **Performance:** 0.018-0.821ms adequate for planning analysis
 - **Best for:** Project management, risk assessment, capacity planning
 
-### City Service Network Design Guidelines
-
-**Network Structure Optimization:**
-1. **Minimize fragmented dependencies** - consolidated service groups perform better
-2. **Use sparse representations** for routine operations (15-20% performance advantage)
-3. **Reserve dense analysis** for comprehensive city-wide planning
-4. **Design modular service groups** to optimize SCC structure
-
-**Operational Recommendations:**
-- **Real-time scheduling:** All algorithms fast enough for interactive city service management
-- **Batch analysis:** Dense networks acceptable for comprehensive planning cycles
-- **Emergency response:** Shortest path optimization enables rapid resource deployment
-- **Maintenance planning:** Critical path analysis identifies service bottlenecks
-
-### Practical Performance Guidelines
-
-**For Interactive City Service Systems:**
-- **Complete analysis pipeline <1ms** supports real-time decision making
-- **SCC preprocessing** prevents infinite loops in automated scheduling
-- **Topological ordering** provides valid execution sequences
-- **Path analysis** optimizes resource allocation and timing
-
-**For Metropolitan-Scale Operations:**
-- **Algorithms scale linearly** to 50+ vertex networks
-- **Sub-millisecond performance** maintained across all service types
-- **Robust cycle handling** supports complex inter-service dependencies
-- **Flexible analysis depth** from quick validation to comprehensive optimization
-
 The implementation successfully handles city service task networks with performance characteristics that exceed practical requirements. The theoretical O(V + E) bounds are not only met but often exceeded due to modern Java optimizations, making this suitable for production city management systems.
 
 ## Run & Build
