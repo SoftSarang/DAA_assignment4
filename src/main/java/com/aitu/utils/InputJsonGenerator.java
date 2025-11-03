@@ -25,7 +25,7 @@ public class InputJsonGenerator {
     /**
      * Generates a single graph with specified structure and density.
      * Sparse: nodeCount * 1.8 edges
-     * Dense: nodeCount * 4 edges (or close to complete graph)
+     * Dense: close to complete graph
      */
     private JsonObject generateGraph(int id, int nodeCount, String variant, boolean isDense) {
         Set<String> edgeSet = new HashSet<>();
@@ -33,9 +33,9 @@ public class InputJsonGenerator {
 
         int targetEdges;
         if (isDense) {
-            targetEdges = Math.min(nodeCount * 4, nodeCount * (nodeCount - 1) / 2);
+            targetEdges = nodeCount * (nodeCount - 1) / 2;
         } else {
-            targetEdges = (int)(nodeCount * 1.8);
+            targetEdges = (int)(nodeCount * 1.5);
         }
 
         switch (variant) {
